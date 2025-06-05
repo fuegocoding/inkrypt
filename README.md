@@ -17,6 +17,7 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 
 - **Markdown-based journaling** with live preview
 - **End-to-end local encryption** using AES-256 (Web Crypto API)
+- **Passphrase-based key derivation** via PBKDF2 for AES keys
 - **Local-first file system** with folders and nested structure (IndexedDB or File System Access API)
 - **Custom templates** for recurring entries
 - **Tagging, calendar view, and timeline navigation**
