@@ -54,7 +54,7 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 ### Installation
 
 ```bash
-git clone https://github.com/your-org/inkrypt.git
+git clone https://github.com/fuegocoding/inkrypt.git
 cd inkrypt
 npm install
 ```
