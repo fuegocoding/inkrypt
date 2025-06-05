@@ -20,3 +20,7 @@ body {
   background-image: linear-gradient(to bottom right, #6366f1, #8b5cf6, #ec4899);
   min-height: 100vh;
 }
+
+.glass {
+  @apply backdrop-blur-lg bg-white/30 dark:bg-gray-800/30 border border-white/40 dark:border-gray-700/40 shadow-xl rounded-xl;
+}

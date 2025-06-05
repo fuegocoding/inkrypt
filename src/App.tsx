@@ -59,14 +59,19 @@ export default function App() {
       setError('Passphrases do not match')
       return
     }
-    const ok = await initKey(passphrase)
-    if (ok) {
-      setUnlocked(true)
-      setPassphrase('')
-      setConfirmPassphrase('')
-      setError('')
-    } else {
-      setError('Incorrect passphrase')
+    try {
+      const ok = await initKey(passphrase)
+      if (ok) {
+        setUnlocked(true)
+        setPassphrase('')
+        setConfirmPassphrase('')
+        setError('')
+      } else {
+        setError('Incorrect passphrase')
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Failed to initialize encryption')
     }
   }
 
@@ -122,7 +127,7 @@ export default function App() {
             e.preventDefault()
             handleUnlock()
           }}
-          className="backdrop-blur-lg bg-white/30 dark:bg-gray-800/30 border border-white/40 dark:border-gray-700/40 shadow-xl rounded-xl p-8 flex flex-col gap-3 min-w-72"
+          className="glass p-8 flex flex-col gap-3 min-w-72"
         >
           <h2 className="text-lg font-semibold text-center">
             {passExists ? 'Enter Passphrase' : 'Set Passphrase'}
@@ -210,7 +215,7 @@ export default function App() {
           className="m-4 w-80 border p-2 font-mono rounded bg-white/70 dark:bg-gray-700/70 text-black dark:text-white"
         />
       )}
-      <div className="flex flex-1 gap-4 p-4 backdrop-blur-lg bg-white/20 dark:bg-gray-800/20 m-4 rounded-xl">
+      <div className="flex flex-1 gap-4 p-4 glass m-4">
       <div className="w-48 border-r border-white/30 pr-2">
         <h2>Notes</h2>
         <select
