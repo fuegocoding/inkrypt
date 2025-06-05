@@ -20,6 +20,9 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 - **Local-first file system** with folders and nested structure (IndexedDB or File System Access API)
 - **Custom templates** for recurring entries
 - **Tagging, calendar view, and timeline navigation**
+- **Built-in templates** for quick daily or gratitude notes
+- **Export notes** to JSON
+- **Tag filtering** and search
 - **Internal linking** with `[[wikilinks]]` syntax *(implemented)*
 - **Interactive graph view** for visualizing relationships between entries *(experimental)*
 - **Modern glassmorphism UI**, dark/light themes, and complete theming engine
@@ -97,6 +100,9 @@ npm run preview
 
 ### Theming
 Use the dropdown in the header to switch between built-in themes. Selecting **Custom** exposes a JSON editor where you can define your own CSS variables, which are saved to local storage.
+
+### Templates and Export
+Use the "Insert Template" dropdown to start a note from a built-in template. Notes can be exported at any time via the **Export** button in the header, which downloads a `inkrypt-notes.json` file.
 
 ## 🌐 Deployment
 
