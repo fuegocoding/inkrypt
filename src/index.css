@@ -17,4 +17,6 @@
 body {
   background-color: var(--bg);
   color: var(--text);
+  background-image: linear-gradient(to bottom right, #6366f1, #8b5cf6, #ec4899);
+  min-height: 100vh;
 }
