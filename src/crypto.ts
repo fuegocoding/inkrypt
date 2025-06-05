@@ -3,11 +3,17 @@ const CHECK_NAME = 'inkrypt-check'
 let cachedKey: CryptoKey | null = null
 
 function strToUint8(str: string): Uint8Array {
-  return Uint8Array.from(atob(str), c => c.charCodeAt(0))
+  const binary = atob(str)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return bytes
 }
 
 function uint8ToStr(u8: Uint8Array): string {
-  return btoa(String.fromCharCode(...u8))
+  const decoder = new TextDecoder('latin1')
+  return btoa(decoder.decode(u8))
 }
 
 async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
