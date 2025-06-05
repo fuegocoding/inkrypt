@@ -6,6 +6,7 @@ import { initKey, hasPassphrase } from './crypto'
 import GraphView from './GraphView'
 import { markdownWithWikiLinks } from './utils'
 import { builtInThemes, applyTheme } from './themes'
+import { templates } from './templates'
 
 export default function App() {
   const { notes, load, add, update, remove } = useNotes()
@@ -13,6 +14,7 @@ export default function App() {
   const [content, setContent] = useState('')
   const [folder, setFolder] = useState(0)
   const [tagsInput, setTagsInput] = useState('')
+  const [tagFilter, setTagFilter] = useState('')
   const [selectedFolder, setSelectedFolder] = useState(-1)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [search, setSearch] = useState('')
@@ -76,6 +78,25 @@ export default function App() {
     setSelectedId(null)
   }
 
+  const applyTemplate = (name: string) => {
+    const t = templates.find((tp) => tp.name === name)
+    if (t) {
+      const date = new Date().toLocaleDateString()
+      setContent(t.content.replace('{{date}}', date))
+    }
+  }
+
+  const handleExport = () => {
+    const data = JSON.stringify(notes, null, 2)
+    const blob = new Blob([data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'inkrypt-notes.json'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const openNoteByTitle = (t: string) => {
     const note = notes.find((n) => n.title === t)
     if (note) {
@@ -96,12 +117,19 @@ export default function App() {
   if (!unlocked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
-        <div className="backdrop-blur-lg bg-white/30 dark:bg-gray-800/30 border border-white/40 dark:border-gray-700/40 shadow-xl rounded-xl p-8 flex flex-col gap-3 min-w-72">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleUnlock()
+          }}
+          className="backdrop-blur-lg bg-white/30 dark:bg-gray-800/30 border border-white/40 dark:border-gray-700/40 shadow-xl rounded-xl p-8 flex flex-col gap-3 min-w-72"
+        >
           <h2 className="text-lg font-semibold text-center">
             {passExists ? 'Enter Passphrase' : 'Set Passphrase'}
           </h2>
           <input
             type="password"
+            autoFocus
             value={passphrase}
             onChange={(e) => setPassphrase(e.target.value)}
             placeholder="Passphrase"
@@ -117,13 +145,13 @@ export default function App() {
             />
           )}
           <button
-            onClick={handleUnlock}
+            type="submit"
             className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
           >
             {passExists ? 'Unlock' : 'Set Passphrase'}
           </button>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-        </div>
+        </form>
       </div>
     )
   }
@@ -153,10 +181,25 @@ export default function App() {
               {showThemeEditor ? 'Close Editor' : 'Edit Theme'}
             </button>
           )}
+          <select
+            onChange={(e) => {
+              applyTemplate(e.target.value)
+              e.currentTarget.selectedIndex = 0
+            }}
+            className="px-2 py-1 border rounded bg-white/30 text-black dark:text-white"
+          >
+            <option>Insert Template</option>
+            {templates.map((t) => (
+              <option key={t.name} value={t.name}>
+                {t.name}
+              </option>
+            ))}
+          </select>
           <button onClick={() => setShowGraph((v) => !v)} className="px-2 py-1 border rounded bg-blue-600 hover:bg-blue-700">
             {showGraph ? 'Hide Graph' : 'Graph'}
           </button>
           <button onClick={resetEditor} className="px-2 py-1 border rounded bg-blue-600 hover:bg-blue-700">New Note</button>
+          <button onClick={handleExport} className="px-2 py-1 border rounded bg-white/30 hover:bg-white/40">Export</button>
         </div>
       </header>
       {showThemeEditor && (
@@ -189,12 +232,22 @@ export default function App() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <input
+          type="text"
+          placeholder="Filter tag..."
+          className="mb-2 border p-1 w-full rounded bg-white/70 dark:bg-gray-700/70 text-black dark:text-white"
+          value={tagFilter}
+          onChange={(e) => setTagFilter(e.target.value)}
+        />
         <ul className="list-none p-0">
           {notes
-            .filter((n) =>
-              (selectedFolder === -1 || n.folderId === selectedFolder) &&
-              n.title.toLowerCase().includes(search.toLowerCase())
+            .filter(
+              (n) =>
+                (selectedFolder === -1 || n.folderId === selectedFolder) &&
+                n.title.toLowerCase().includes(search.toLowerCase()) &&
+                (tagFilter === '' || n.tags.includes(tagFilter))
             )
+            .sort((a, b) => b.updatedAt - a.updatedAt)
             .map((n) => (
               <li
                 key={n.id}
