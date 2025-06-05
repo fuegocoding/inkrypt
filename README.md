@@ -87,3 +87,29 @@ Serve the production build locally.
 ```bash
 npm run preview
 ```
+
+## 🌐 Deployment
+
+After running `npm run build`, the compiled files are placed in the `dist/` directory. Host these static files at the root of your domain so that the PWA manifest's `start_url` of `/` resolves correctly.
+
+### Nginx
+
+1. Copy the contents of `dist/` to your web server.
+2. Configure Nginx to serve the directory:
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+    root /var/www/inkrypt/dist;
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+### Vercel
+
+1. Install the [Vercel CLI](https://vercel.com/docs/cli) and run `vercel` in the project root.
+2. When prompted for the output directory, enter `dist`.
+3. The site will be deployed to a Vercel URL that can be mapped to your custom domain.
