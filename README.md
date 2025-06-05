@@ -49,6 +49,7 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 
 - Node.js ≥ 18.x
 - npm ≥ 9.x (or `pnpm` / `yarn`)
+- Git
 
 ### Installation
 
@@ -56,6 +57,7 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 git clone https://github.com/your-org/inkrypt.git
 cd inkrypt
 npm install
+```
 
 ### Development
 
@@ -63,4 +65,25 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:5173> in your browser.
+Start the development server and open <http://localhost:5173> in your browser.
+
+### Linting
+Run ESLint to check code quality.
+
+```bash
+npm run lint
+```
+
+### Build
+Build the app for production.
+
+```bash
+npm run build
+```
+
+### Preview
+Serve the production build locally.
+
+```bash
+npm run preview
+```
