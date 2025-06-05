@@ -5,11 +5,14 @@ import { useNotes } from './store'
 import { initKey } from './crypto'
 
 export default function App() {
-  const { notes, load, add, remove } = useNotes()
+  const { notes, load, add, update, remove } = useNotes()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [folder, setFolder] = useState(0)
+  const [tagsInput, setTagsInput] = useState('')
   const [selectedFolder, setSelectedFolder] = useState(-1)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [search, setSearch] = useState('')
   const [passphrase, setPassphrase] = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState('')
@@ -31,6 +34,14 @@ export default function App() {
     }
   }
 
+  const resetEditor = () => {
+    setTitle('')
+    setContent('')
+    setFolder(0)
+    setTagsInput('')
+    setSelectedId(null)
+  }
+
   if (!unlocked) {
     return (
       <div className="flex flex-col gap-2 m-8">
@@ -50,7 +61,12 @@ export default function App() {
   }
 
   return (
-    <div className="flex gap-4 p-4 font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
+      <header className="flex justify-between items-center bg-blue-600 text-white px-4 py-2 shadow">
+        <h1 className="font-bold">Inkrypt</h1>
+        <button onClick={resetEditor} className="px-2 py-1 border rounded bg-blue-800">New Note</button>
+      </header>
+      <div className="flex flex-1 gap-4 p-4">
       <div className="w-48 border-r border-gray-300">
         <h2>Notes</h2>
         <select
@@ -65,30 +81,46 @@ export default function App() {
             </option>
           ))}
         </select>
+        <input
+          type="text"
+          placeholder="Search..."
+          className="mb-2 border p-1 w-full"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <ul className="list-none p-0">
           {notes
-            .filter((n) => selectedFolder === -1 || n.folderId === selectedFolder)
+            .filter((n) =>
+              (selectedFolder === -1 || n.folderId === selectedFolder) &&
+              n.title.toLowerCase().includes(search.toLowerCase())
+            )
             .map((n) => (
-            <li
-              key={n.id}
-              onClick={() => {
-                setTitle(n.title)
-                setContent(n.content)
-              }}
-              className="cursor-pointer py-1"
-            >
-              {n.title} (f{n.folderId}){' '}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  remove(n.id!)
+              <li
+                key={n.id}
+                onClick={() => {
+                  setTitle(n.title)
+                  setContent(n.content)
+                  setFolder(n.folderId ?? 0)
+                  setTagsInput(n.tags.join(' '))
+                  setSelectedId(n.id!)
                 }}
-                className="ml-2 px-1 text-sm border rounded"
+                className="cursor-pointer py-1 hover:underline"
               >
-                x
-              </button>
-            </li>
-          ))}
+                {n.title} (f{n.folderId})
+                {n.tags.length > 0 && (
+                  <span className="text-xs text-gray-500 ml-1">[{n.tags.join(', ')}]</span>
+                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    remove(n.id!)
+                  }}
+                  className="ml-2 px-1 text-sm border rounded"
+                >
+                  x
+                </button>
+              </li>
+            ))}
         </ul>
       </div>
       <div className="flex flex-1 flex-col gap-2">
@@ -105,24 +137,44 @@ export default function App() {
           onChange={(e) => setFolder(Number(e.target.value))}
           className="border p-2"
         />
+        <input
+          type="text"
+          placeholder="Tags"
+          value={tagsInput}
+          onChange={(e) => setTagsInput(e.target.value)}
+          className="border p-2"
+        />
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={10}
           className="border p-2 font-mono"
         />
-        <button
-          onClick={() => {
-            add(title, content, folder)
-            setTitle('')
-            setContent('')
-          }}
-          className="self-start px-3 py-1 border rounded"
-        >
-          Save
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              const tags = tagsInput.split(' ').filter(Boolean)
+              if (selectedId === null) {
+                add(title, content, folder, tags)
+              } else {
+                update(selectedId, title, content, folder, tags)
+              }
+              resetEditor()
+            }}
+            className="px-3 py-1 border rounded bg-blue-600 text-white"
+          >
+            {selectedId === null ? 'Save' : 'Update'}
+          </button>
+          <button
+            onClick={resetEditor}
+            className="px-3 py-1 border rounded"
+          >
+            New Note
+          </button>
+        </div>
         <h3>Preview</h3>
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      </div>
       </div>
     </div>
   )

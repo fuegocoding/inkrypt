@@ -12,6 +12,13 @@ interface State {
     folderId?: number,
     tags?: string[]
   ) => Promise<void>
+  update: (
+    id: number,
+    title: string,
+    content: string,
+    folderId?: number,
+    tags?: string[]
+  ) => Promise<void>
   remove: (id: number) => Promise<void>
 }
 
@@ -47,6 +54,22 @@ export const useNotes = create<State>((set) => ({
         ...state.notes,
         { id, title, content, folderId, tags, createdAt, updatedAt }
       ]
+    }))
+  },
+  async update(id, title, content, folderId = 0, tags: string[] = []) {
+    const encrypted = await encryptText(content)
+    const updatedAt = Date.now()
+    await db.notes.update(id, {
+      title,
+      content: encrypted,
+      folderId,
+      tags,
+      updatedAt
+    })
+    set((state) => ({
+      notes: state.notes.map((n) =>
+        n.id === id ? { ...n, title, content, folderId, tags, updatedAt } : n
+      )
     }))
   },
   async remove(id) {
