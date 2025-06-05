@@ -6,7 +6,12 @@ import { encryptText, decryptText } from './crypto'
 interface State {
   notes: Note[]
   load: () => Promise<void>
-  add: (title: string, content: string) => Promise<void>
+  add: (
+    title: string,
+    content: string,
+    folderId?: number,
+    tags?: string[]
+  ) => Promise<void>
   remove: (id: number) => Promise<void>
 }
 
@@ -17,16 +22,32 @@ export const useNotes = create<State>((set) => ({
     const decrypted = await Promise.all(
       records.map(async (n) => ({
         ...n,
+        folderId: n.folderId ?? 0,
+        tags: n.tags ?? [],
+        updatedAt: n.updatedAt ?? n.createdAt,
         content: await decryptText(n.content)
       }))
     )
     set({ notes: decrypted })
   },
-  async add(title, content) {
+  async add(title, content, folderId = 0, tags: string[] = []) {
     const encrypted = await encryptText(content)
     const createdAt = Date.now()
-    const id = await db.notes.add({ title, content: encrypted, createdAt })
-    set((state) => ({ notes: [...state.notes, { id, title, content, createdAt }] }))
+    const updatedAt = createdAt
+    const id = await db.notes.add({
+      title,
+      content: encrypted,
+      folderId,
+      tags,
+      createdAt,
+      updatedAt
+    })
+    set((state) => ({
+      notes: [
+        ...state.notes,
+        { id, title, content, folderId, tags, createdAt, updatedAt }
+      ]
+    }))
   },
   async remove(id) {
     await db.notes.delete(id)

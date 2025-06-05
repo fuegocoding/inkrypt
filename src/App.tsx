@@ -8,6 +8,8 @@ export default function App() {
   const { notes, load, add, remove } = useNotes()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [folder, setFolder] = useState(0)
+  const [selectedFolder, setSelectedFolder] = useState(-1)
   const [passphrase, setPassphrase] = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState('')
@@ -51,8 +53,22 @@ export default function App() {
     <div className="flex gap-4 p-4 font-sans">
       <div className="w-48 border-r border-gray-300">
         <h2>Notes</h2>
+        <select
+          className="mb-2 border p-1 w-full"
+          value={selectedFolder}
+          onChange={(e) => setSelectedFolder(Number(e.target.value))}
+        >
+          <option value={-1}>All Folders</option>
+          {Array.from(new Set(notes.map((n) => n.folderId ?? 0))).map((f) => (
+            <option key={f} value={f}>
+              Folder {f}
+            </option>
+          ))}
+        </select>
         <ul className="list-none p-0">
-          {notes.map((n) => (
+          {notes
+            .filter((n) => selectedFolder === -1 || n.folderId === selectedFolder)
+            .map((n) => (
             <li
               key={n.id}
               onClick={() => {
@@ -61,7 +77,7 @@ export default function App() {
               }}
               className="cursor-pointer py-1"
             >
-              {n.title}{' '}
+              {n.title} (f{n.folderId}){' '}
               <button
                 onClick={(e) => {
                   e.stopPropagation()
@@ -82,6 +98,13 @@ export default function App() {
           onChange={(e) => setTitle(e.target.value)}
           className="border p-2"
         />
+        <input
+          type="number"
+          placeholder="Folder"
+          value={folder}
+          onChange={(e) => setFolder(Number(e.target.value))}
+          className="border p-2"
+        />
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
@@ -90,7 +113,7 @@ export default function App() {
         />
         <button
           onClick={() => {
-            add(title, content)
+            add(title, content, folder)
             setTitle('')
             setContent('')
           }}
