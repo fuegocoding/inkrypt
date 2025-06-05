@@ -2,6 +2,10 @@ const SALT_NAME = 'inkrypt-salt'
 const CHECK_NAME = 'inkrypt-check'
 let cachedKey: CryptoKey | null = null
 
+export function hasPassphrase(): boolean {
+  return localStorage.getItem(SALT_NAME) !== null
+}
+
 function strToUint8(str: string): Uint8Array {
   const binary = atob(str)
   const bytes = new Uint8Array(binary.length)

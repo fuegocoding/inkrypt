@@ -1,3 +1,4 @@
+/// <reference types="@testing-library/jest-dom" />
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import App from './App';
@@ -7,6 +8,7 @@ import App from './App';
 describe('App', () => {
   it('renders passphrase prompt', () => {
     render(<App />);
-    expect(screen.getByText(/enter passphrase/i)).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { name: /passphrase/i });
+    expect(heading).toBeInTheDocument();
   });
 });

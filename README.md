@@ -70,6 +70,10 @@ npm run dev
 
 Start the development server and open <http://localhost:5173> in your browser.
 
+On first launch you'll be prompted to **set a passphrase**. This passphrase is
+used to encrypt your journal locally. Enter the same value in both fields to
+continue. Subsequent launches will ask for this passphrase to unlock your notes.
+
 ### Linting
 Run ESLint to check code quality.
 
@@ -90,6 +94,9 @@ Serve the production build locally.
 ```bash
 npm run preview
 ```
+
+### Theming
+Use the dropdown in the header to switch between built-in themes. Selecting **Custom** exposes a JSON editor where you can define your own CSS variables, which are saved to local storage.
 
 ## 🌐 Deployment
 

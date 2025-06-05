@@ -25,7 +25,7 @@ export default function GraphView({ notes, onOpen }: Props) {
   const posMap = new Map(positions.map((p) => [p.title, p]))
 
   return (
-    <svg width={400} height={400} className="border bg-white dark:bg-gray-800">
+    <svg width={400} height={400} className="border bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded">
       {edges.map((e, i) => {
         const s = posMap.get(e.source)
         const t = posMap.get(e.target)
