@@ -2,16 +2,48 @@ import { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useNotes } from './store'
+import { initKey } from './crypto'
 import './App.css'
 
 export default function App() {
   const { notes, load, add, remove } = useNotes()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [passphrase, setPassphrase] = useState('')
+  const [unlocked, setUnlocked] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    load()
-  }, [load])
+    if (unlocked) {
+      load()
+    }
+  }, [load, unlocked])
+
+  const handleUnlock = async () => {
+    const ok = await initKey(passphrase)
+    if (ok) {
+      setUnlocked(true)
+      setPassphrase('')
+      setError('')
+    } else {
+      setError('Incorrect passphrase')
+    }
+  }
+
+  if (!unlocked) {
+    return (
+      <div className="passphrase">
+        <h2>Enter Passphrase</h2>
+        <input
+          type="password"
+          value={passphrase}
+          onChange={(e) => setPassphrase(e.target.value)}
+        />
+        <button onClick={handleUnlock}>Unlock</button>
+        {error && <p className="error">{error}</p>}
+      </div>
+    )
+  }
 
   return (
     <div className="app">

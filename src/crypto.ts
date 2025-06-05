@@ -1,4 +1,6 @@
-const KEY_NAME = 'inkrypt-key'
+const SALT_NAME = 'inkrypt-salt'
+const CHECK_NAME = 'inkrypt-check'
+let cachedKey: CryptoKey | null = null
 
 function strToUint8(str: string): Uint8Array {
   return Uint8Array.from(atob(str), c => c.charCodeAt(0))
@@ -8,16 +10,56 @@ function uint8ToStr(u8: Uint8Array): string {
   return btoa(String.fromCharCode(...u8))
 }
 
-async function getKey(): Promise<CryptoKey> {
-  const existing = localStorage.getItem(KEY_NAME)
-  if (existing) {
-    const raw = strToUint8(existing)
-    return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt'])
-  }
-  const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt'])
+async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
+  const passKey = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(passphrase),
+    'PBKDF2',
+    false,
+    ['deriveKey', 'deriveBits']
+  )
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    passKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  )
+}
+
+async function digestKey(key: CryptoKey): Promise<Uint8Array> {
   const raw = await crypto.subtle.exportKey('raw', key)
-  localStorage.setItem(KEY_NAME, uint8ToStr(new Uint8Array(raw)))
-  return key
+  const hash = await crypto.subtle.digest('SHA-256', raw)
+  return new Uint8Array(hash)
+}
+
+export async function initKey(passphrase: string): Promise<boolean> {
+  const saltStr = localStorage.getItem(SALT_NAME)
+  const checkStr = localStorage.getItem(CHECK_NAME)
+
+  if (saltStr && checkStr) {
+    const salt = strToUint8(saltStr)
+    const key = await deriveKey(passphrase, salt)
+    const hash = uint8ToStr(await digestKey(key))
+    if (hash !== checkStr) {
+      return false
+    }
+    cachedKey = key
+    return true
+  }
+
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const key = await deriveKey(passphrase, salt)
+  const hash = await digestKey(key)
+  localStorage.setItem(SALT_NAME, uint8ToStr(salt))
+  localStorage.setItem(CHECK_NAME, uint8ToStr(hash))
+  cachedKey = key
+  return true
+}
+
+async function getKey(): Promise<CryptoKey> {
+  if (!cachedKey) throw new Error('Key not initialized')
+  return cachedKey
 }
 
 export async function encryptText(text: string): Promise<string> {
