@@ -56,3 +56,14 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 git clone https://github.com/your-org/inkrypt.git
 cd inkrypt
 npm install
+```
+
+### Development
+
+Run the following commands to lint, build, and start the application:
+
+```bash
+npm run lint      # check code quality
+npm run build     # create a production build
+npm run dev       # start the development server
+```
