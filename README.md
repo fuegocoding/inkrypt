@@ -20,8 +20,8 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 - **Local-first file system** with folders and nested structure (IndexedDB or File System Access API)
 - **Custom templates** for recurring entries
 - **Tagging, calendar view, and timeline navigation**
-- **Internal linking** with `[[wikilinks]]` syntax
-- **Interactive graph view** for visualizing relationships between entries
+- **Internal linking** with `[[wikilinks]]` syntax *(implemented)*
+- **Interactive graph view** for visualizing relationships between entries *(experimental)*
 - **Modern glassmorphism UI**, dark/light themes, and complete theming engine
 - **Progressive Web App (PWA)** installable on any device
 - **Zero telemetry, zero vendor lock-in**

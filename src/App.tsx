@@ -3,6 +3,8 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useNotes } from './store'
 import { initKey } from './crypto'
+import GraphView from './GraphView'
+import { markdownWithWikiLinks } from './utils'
 
 export default function App() {
   const { notes, load, add, update, remove } = useNotes()
@@ -16,6 +18,7 @@ export default function App() {
   const [passphrase, setPassphrase] = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState('')
+  const [showGraph, setShowGraph] = useState(false)
 
   useEffect(() => {
     if (unlocked) {
@@ -42,6 +45,23 @@ export default function App() {
     setSelectedId(null)
   }
 
+  const openNoteByTitle = (t: string) => {
+    const note = notes.find((n) => n.title === t)
+    if (note) {
+      setTitle(note.title)
+      setContent(note.content)
+      setFolder(note.folderId ?? 0)
+      setTagsInput(note.tags.join(' '))
+      setSelectedId(note.id ?? null)
+    } else {
+      setTitle(t)
+      setContent('')
+      setFolder(0)
+      setTagsInput('')
+      setSelectedId(null)
+    }
+  }
+
   if (!unlocked) {
     return (
       <div className="flex flex-col gap-2 m-8">
@@ -64,7 +84,12 @@ export default function App() {
     <div className="min-h-screen flex flex-col font-sans">
       <header className="flex justify-between items-center bg-blue-600 text-white px-4 py-2 shadow">
         <h1 className="font-bold">Inkrypt</h1>
-        <button onClick={resetEditor} className="px-2 py-1 border rounded bg-blue-800">New Note</button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowGraph((v) => !v)} className="px-2 py-1 border rounded bg-blue-800">
+            {showGraph ? 'Hide Graph' : 'Graph'}
+          </button>
+          <button onClick={resetEditor} className="px-2 py-1 border rounded bg-blue-800">New Note</button>
+        </div>
       </header>
       <div className="flex flex-1 gap-4 p-4">
       <div className="w-48 border-r border-gray-300">
@@ -173,7 +198,32 @@ export default function App() {
           </button>
         </div>
         <h3>Preview</h3>
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a({ href, children }) {
+              if (href?.startsWith('wiki:')) {
+                const t = decodeURIComponent(href.slice(5))
+                return (
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      openNoteByTitle(t)
+                    }}
+                    className="text-blue-600 underline"
+                  >
+                    {children}
+                  </a>
+                )
+              }
+              return <a href={href}>{children}</a>
+            }
+          }}
+        >
+          {markdownWithWikiLinks(content)}
+        </ReactMarkdown>
+        {showGraph && <GraphView notes={notes} onOpen={openNoteByTitle} />}
       </div>
       </div>
     </div>
