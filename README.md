@@ -56,3 +56,11 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 git clone https://github.com/your-org/inkrypt.git
 cd inkrypt
 npm install
+
+### Development
+
+```bash
+npm run dev
+```
+
+Open <http://localhost:5173> in your browser.
