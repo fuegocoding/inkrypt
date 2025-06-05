@@ -26,6 +26,9 @@ Inkrypt is designed to be your **personal journaling sanctuary**—an encrypted,
 - **Progressive Web App (PWA)** installable on any device
 - **Zero telemetry, zero vendor lock-in**
 
+### ⚠️ Disclaimer
+The encryption in Inkrypt has **not** been professionally audited. Use it for personal purposes at your own risk.
+
 ---
 
 ## 🧱 Tech Stack
